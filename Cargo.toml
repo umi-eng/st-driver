@@ -13,6 +13,7 @@ rtic-sync = "1.4.0"
 
 [features]
 default = ["vn9e30f"]
+vn9e30f = []
 defmt-1 = [
     "dep:defmt",
     "device-driver/defmt-03",
