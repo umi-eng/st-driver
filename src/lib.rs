@@ -1,5 +1,7 @@
 //! ST SPI smart high-side driver client implementation.
 
+#![cfg_attr(not(test), no_std)]
+
 #[cfg(feature = "vn9e30f")]
 pub mod vn9e30f;
 
