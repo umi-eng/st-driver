@@ -179,6 +179,20 @@ where
         })
     }
 
+    /// Configure VDS detection at turn-off masking bit.
+    pub async fn vds_masking(
+        &mut self,
+        num: usize,
+        mask: bool,
+    ) -> Result<(), DeviceError<BUS, CS>> {
+        assert!(num < self.channels, "Channel number outside of bounds");
+
+        self.dev
+            .out_cfg_r(num)
+            .modify_async(|w| w.set_vdsmask(mask))
+            .await
+    }
+
     /// Configure the channel kind.
     pub async fn channel_kind(
         &mut self,
