@@ -355,6 +355,53 @@ where
     pub async fn pwm_sync(&mut self) -> Result<(), DeviceError<BUS, CS>> {
         self.dev.ctrl().modify_async(|r| r.set_pwmsync(true)).await
     }
+
+    pub async fn output_status(
+        &mut self,
+        num: usize,
+    ) -> Result<OutputStatus, DeviceError<BUS, CS>> {
+        assert!(num < self.channels, "Channel number outside of bounds");
+
+        let res = self.dev.out_sr(num).read_async().await?;
+
+        Ok(OutputStatus {
+            vcc_undervoltage: res.vccuv(),
+            pwm_clock_low: res.pwmclocklow(),
+            spi_error: res.spie(),
+            chip_reset: res.rst(),
+            channel_latch_off: res.chloffsr(),
+            output_pull_up: res.olpusr(),
+            output_stuck: res.stkfltr(),
+            vds_status: res.vdsfsr(),
+            channel_feedback_status: res.chfbst(),
+        })
+    }
+}
+
+/// Output status.
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[cfg_attr(feature = "defmt-1", derive(defmt::Format))]
+#[non_exhaustive]
+pub struct OutputStatus {
+    /// VCC undervoltage observed.
+    pub vcc_undervoltage: bool,
+    /// PWM clock frequency too low.
+    pub pwm_clock_low: bool,
+    /// SPI error.
+    pub spi_error: bool,
+    /// Chip reset.
+    pub chip_reset: bool,
+    /// Channel has latched off.
+    pub channel_latch_off: bool,
+    /// Output pull-up generator status.
+    pub output_pull_up: bool,
+    /// Output stuck to Vcc/open-load state status.
+    pub output_stuck: bool,
+    /// VDS feedback indicating a potential overload condition.
+    pub vds_status: bool,
+    /// Channel feedback status.
+    /// A combination of power limitation, OT, overload (VDS at turn-off).
+    pub channel_feedback_status: bool,
 }
 
 /// Latch-off time.
